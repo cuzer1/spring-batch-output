@@ -42,9 +42,9 @@ public class SysOutJobConfiguration {
 				.build();
 	}
 
-	@Bean
-	public Job job1() {
-		return jobBuilderFactory.get("SysOutJob").start(step1()).build();
-	}
+//	@Bean
+//	public Job job1() {
+//		return jobBuilderFactory.get("SysOutJob").start(step1()).build();
+//	}
 
 }
