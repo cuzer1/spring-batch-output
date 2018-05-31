@@ -13,32 +13,30 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
-import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.transform.PassThroughLineAggregator;
+import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.oxm.xstream.XStreamMarshaller;
 
 import com.cuzer.springbootoutput.domains.Customer;
-import com.cuzer.springbootoutput.domains.CustomerLineAggregator;
 import com.cuzer.springbootoutput.domains.CustomerRowMapper;
 
 @Configuration
-public class FlatFileWriterJobConfiguration {
+public class XMLFileJobConfiguration {
+	
+	@Autowired
+	public JobBuilderFactory jobBuilderFactory;
 
 	@Autowired
-	private JobBuilderFactory jobBuilderFactory;
-
-	@Autowired
-	private StepBuilderFactory stepBuilderFactory;
+	public StepBuilderFactory stepBuilderFactory;
 
 	@Autowired
 	public DataSource dataSource;
 
 	@Bean
 	public JdbcPagingItemReader<Customer> pagingItemReader() {
-
 		JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
 
 		reader.setDataSource(this.dataSource);
@@ -58,32 +56,45 @@ public class FlatFileWriterJobConfiguration {
 		reader.setQueryProvider(queryProvider);
 
 		return reader;
-		
 	}
 
 	@Bean
-	public FlatFileItemWriter<Customer> flatFileItemWriter() throws Exception {
-		FlatFileItemWriter<Customer> flatFileItemWriter = new FlatFileItemWriter<>();
+	public StaxEventItemWriter<Customer> customerItemWriter() throws Exception {
 
-//		flatFileItemWriter.setLineAggregator(new PassThroughLineAggregator<>());
-		 flatFileItemWriter.setLineAggregator(new CustomerLineAggregator());
-		String customerOutputPath = File.createTempFile("customerOutput", "out").getAbsolutePath();
-		System.out.println("Output Path: " + customerOutputPath);
-		flatFileItemWriter.setResource(new FileSystemResource(customerOutputPath));
-		flatFileItemWriter.afterPropertiesSet();
+		XStreamMarshaller marshaller = new XStreamMarshaller();
 
-		return flatFileItemWriter;
+		Map<String, Class> aliases = new HashMap<>();
+		aliases.put("customer", Customer.class);
+
+		marshaller.setAliases(aliases);
+
+		StaxEventItemWriter<Customer> itemWriter = new StaxEventItemWriter<>();
+
+		itemWriter.setRootTagName("customers");
+		itemWriter.setMarshaller(marshaller);
+		String customerOutputPath = File.createTempFile("customerOutput", ".xml").getAbsolutePath();
+		System.out.println(">> Output Path: " + customerOutputPath);
+		itemWriter.setResource(new FileSystemResource(customerOutputPath));
+
+		itemWriter.afterPropertiesSet();
+
+		return itemWriter;
 	}
 
 	@Bean
 	public Step step1() throws Exception {
-		return stepBuilderFactory.get("step1").<Customer, Customer>chunk(10).reader(pagingItemReader())
-				.writer(flatFileItemWriter()).build();
+		return stepBuilderFactory.get("step1")
+				.<Customer, Customer>chunk(10)
+				.reader(pagingItemReader())
+				.writer(customerItemWriter())
+				.build();
 	}
 
-//	@Bean
-//	public Job job() throws Exception {
-//		return jobBuilderFactory.get("FlatFileJob1").start(step1()).build();
-//	}
+	@Bean
+	public Job job() throws Exception {
+		return jobBuilderFactory.get("XMFileJob")
+				.start(step1())
+				.build();
+	}
 
 }
