@@ -61,25 +61,25 @@ public class FlatFileWriterJobConfiguration {
 		
 	}
 
-	@Bean
-	public FlatFileItemWriter<Customer> flatFileItemWriter() throws Exception {
-		FlatFileItemWriter<Customer> flatFileItemWriter = new FlatFileItemWriter<>();
-
-//		flatFileItemWriter.setLineAggregator(new PassThroughLineAggregator<>());
-		 flatFileItemWriter.setLineAggregator(new CustomerLineAggregator());
-		String customerOutputPath = File.createTempFile("customerOutput", "out").getAbsolutePath();
-		System.out.println("Output Path: " + customerOutputPath);
-		flatFileItemWriter.setResource(new FileSystemResource(customerOutputPath));
-		flatFileItemWriter.afterPropertiesSet();
-
-		return flatFileItemWriter;
-	}
-
-	@Bean
-	public Step step1() throws Exception {
-		return stepBuilderFactory.get("step1").<Customer, Customer>chunk(10).reader(pagingItemReader())
-				.writer(flatFileItemWriter()).build();
-	}
+//	@Bean
+//	public FlatFileItemWriter<Customer> flatFileItemWriter() throws Exception {
+//		FlatFileItemWriter<Customer> flatFileItemWriter = new FlatFileItemWriter<>();
+//
+////		flatFileItemWriter.setLineAggregator(new PassThroughLineAggregator<>());
+//		 flatFileItemWriter.setLineAggregator(new CustomerLineAggregator());
+//		String customerOutputPath = File.createTempFile("customerOutput", ".out").getAbsolutePath();
+//		System.out.println("Output Path: " + customerOutputPath);
+//		flatFileItemWriter.setResource(new FileSystemResource(customerOutputPath));
+//		flatFileItemWriter.afterPropertiesSet();
+//
+//		return flatFileItemWriter;
+//	}
+//
+//	@Bean
+//	public Step step1() throws Exception {
+//		return stepBuilderFactory.get("step1").<Customer, Customer>chunk(10).reader(pagingItemReader())
+//				.writer(flatFileItemWriter()).build();
+//	}
 
 //	@Bean
 //	public Job job() throws Exception {

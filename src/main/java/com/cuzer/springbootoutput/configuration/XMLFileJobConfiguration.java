@@ -90,11 +90,11 @@ public class XMLFileJobConfiguration {
 				.build();
 	}
 
-	@Bean
-	public Job job() throws Exception {
-		return jobBuilderFactory.get("XMFileJob")
-				.start(step1())
-				.build();
-	}
+//	@Bean
+//	public Job job() throws Exception {
+//		return jobBuilderFactory.get("XMFileJob")
+//				.start(step1())
+//				.build();
+//	}
 
 }
