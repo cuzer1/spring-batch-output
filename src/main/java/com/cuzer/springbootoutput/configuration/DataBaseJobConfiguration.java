@@ -67,9 +67,9 @@ public class DataBaseJobConfiguration {
 				.writer(customerItemWriter()).build();
 	}
 
-	@Bean
-	public Job job() {
-		return jobBuilderFactory.get("DatabaseWriterJob").start(step1()).build();
-	}
+//	@Bean
+//	public Job job() {
+//		return jobBuilderFactory.get("DatabaseWriterJob").start(step1()).build();
+//	}
 
 }
